@@ -29,3 +29,6 @@ else
   TriggerServerEvent('esx_billing:sendBill', GetPlayerServerId(closestPlayer), 'society_taxi', 'Taxi', amount)
 end
 ```
+## Ajouts
+TVA de 10% sur les factures
+Il n'est plus possible de payer une facture sans avoir l'argent sur soit
