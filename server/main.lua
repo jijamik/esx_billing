@@ -145,10 +145,14 @@ ESX.RegisterServerCallback('esx_billing:payBill', function(source, cb, id)
 							function(rowsChanged)
 
 								xPlayer.removeMoney(amount)
-								foundPlayer.addMoney(amount)
+								foundPlayer.addMoney(math.floor(amount/1.1))
 
+								TriggerEvent('esx_addonaccount:getSharedAccount', 'society_state', function(account)
+  								account.addMoney(math.floor(amount*0.1))
+							end)
 								TriggerClientEvent('esx:showNotification', xPlayer.source, _U('paid_invoice') .. amount)
-								TriggerClientEvent('esx:showNotification', foundPlayer.source, _U('received_payment') .. amount)
+								TriggerClientEvent('esx:showNotification', foundPlayer.source, _U('received_payment') .. math.floor(amount/1.1))
+								TriggerClientEvent('esx:showNotification', foundPlayer.source, _U('TVA') .. math.floor(amount*0.1))
 
 								cb()
 
@@ -165,7 +169,7 @@ ESX.RegisterServerCallback('esx_billing:payBill', function(source, cb, id)
 			else
 
 				TriggerEvent('esx_addonaccount:getSharedAccount', target, function(account)
-
+					if xPlayer.get('money') >= amount then
 					MySQL.Async.execute(
 						'DELETE from billing WHERE id = @id',
 						{
@@ -174,19 +178,30 @@ ESX.RegisterServerCallback('esx_billing:payBill', function(source, cb, id)
 						function(rowsChanged)
 
 							xPlayer.removeMoney(amount)
-							account.addMoney(amount)
+							account.addMoney(math.floor(amount/1.1))
+							
+							TriggerEvent('esx_addonaccount:getSharedAccount', 'society_state', function(account)
+  
+							account.addMoney(math.floor(amount*0.1))
 
-							TriggerClientEvent('esx:showNotification', xPlayer.source, _U('paid_invoice') .. amount)
+    						end)
+
+								TriggerClientEvent('esx:showNotification', xPlayer.source, _U('paid_invoice') .. amount)
 
 							if foundPlayer ~= nil then
-								TriggerClientEvent('esx:showNotification', foundPlayer.source, _U('received_payment') .. amount)
+								TriggerClientEvent('esx:showNotification', foundPlayer.source, _U('received_payment') .. math.floor(amount/1.1))
+								TriggerClientEvent('esx:showNotification', foundPlayer.source, _U('tva') .. math.floor(amount*0.1))
 							end
 
 							cb()
 
+
 						end
 					)
-
+					else
+						TriggerClientEvent('esx:showNotification', foundPlayer.source, ('Le client n\'a pas assez d\'argent'))
+						TriggerClientEvent('esx:showNotification', xPlayer.source, ('Vous n\'avez pas assez d\'argent'))
+					end
 				end)
 
 			end
